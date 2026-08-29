@@ -47,12 +47,18 @@ Thumbs.db
 
 # User documents, scans, exports, OCR output - never commit real user content
 # (this repository is public).
-documents/
-templates/
-exports/
-scans/
+# Anchored to repository root so lib/core/documents/ is NOT ignored.
+/documents/
+/templates/
+/exports/
+/scans/
 *.pdf
 *.png
 *.jpg
 *.jpeg
 !assets/**/*.png
+# Explicitly allow core document domain and its tests (defense against broad patterns)
+!lib/core/documents/
+!lib/core/documents/**
+!test/core/documents/
+!test/core/documents/**
