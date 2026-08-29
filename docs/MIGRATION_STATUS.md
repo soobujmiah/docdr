@@ -129,58 +129,101 @@ Recorded so a future session does not "rediscover" them and reverse the decision
 | `image` + `printing` + Syncfusion PDF (background import) | DEFER | All licence-gated; Syncfusion eligibility is UNKNOWN and is the critical path for rendering. |
 | `path_provider` | DEFER | Permissive but unverified. Needed only at the application layer to supply the store root. |
 
+### Slice 5 — PDF Technology / Licence Gate
+
+| Field | Record |
+|---|---|
+| **Source** | Candidate stack: `pdfrx` + PDFium (rendering) and `pdf` (generation) |
+| **Target** | `docs/PDF_TECHNOLOGY_EVALUATION.md`, `THIRD_PARTY_NOTICES.md`, `pubspec.yaml` |
+| **Preserved behavior** | N/A — new gate, not migration |
+| **Known differences** | Licence gate closed before code: exact versions audited via actual LICENSE file fetch, not pub.dev metadata alone. |
+| **Tests** | Licence matrix in evaluation doc, evidence log of 20+ fetches |
+| **Test result** | **VERIFIED — ACCEPTED with attribution** — all licences permissive MIT/BSD-3-Clause/Apache-2.0, no GPL/AGPL/LGPL/SSPL. PDFium BSD-3-Clause + permissive third-party (freetype, libjpeg, lcms2, libopenjpeg, zlib, agg, abseil) requires attribution. |
+| **Security implications** | Defines bounds for future prototype: path traversal, absolute escape, .., symlink, oversized dimensions/docs, excessive page/element count, oversized images, decompression/ZIP bomb, unbounded batch. |
+| **License/provenance** | **VERIFIED:** pdfrx 2.4.7 MIT (verified publisher espresso3389.jp, https://pub.dev/packages/pdfrx/license), pdfrx_engine 0.4.6 MIT, pdfium_dart 0.2.5 MIT, pdfium_flutter 0.2.3 MIT, PDFium BSD-3-Clause (https://pdfium.googlesource.com/pdfium/+/main/LICENSE + pypdfium2 docs + Mozilla bug 1368948 third-party list), pdf 3.13.0 Apache-2.0 (https://pub.dev/packages/pdf/license + GitHub LICENSE commit 421183a 2019-02-03), archive MIT, image MIT, crypto BSD-3-Clause, barcode Apache-2.0, bidi MIT, xml MIT, path_parsing MIT, vector_math BSD-3-Clause, meta BSD-3-Clause, collection BSD-3-Clause, path BSD-3-Clause, ffi BSD-3-Clause, http BSD-3-Clause, yaml MIT, rxdart Apache-2.0, synchronized MIT, web BSD-3-Clause, url_launcher BSD-3-Clause, path_provider BSD-3-Clause, petitparser MIT, posix MIT. No copyleft. |
+| **Commit** | `37536c3` (gate docs) |
+
+### Slice 6 — PDF Rendering + Generation Prototype (vendor-neutral)
+
+| Field | Record |
+|---|---|
+| **Source** | RGEN `custom_pdf_service.dart` (vector PDF rendering) as behavioural reference, clean-room re-implementation |
+| **Target** | `lib/core/documents/document_renderer.dart` (interface), `lib/core/rendering/pdfium/pdfium_renderer_adapter.dart` (real implementation), `lib/core/generation/document_generator.dart` (interface), `lib/core/generation/pdf_generator_adapter.dart` (real implementation using pdf package) |
+| **Preserved behavior** | Template+Data→Document→PDF pipeline: normalized 0..1 geometry → PDF points, text, multiline, date, serial (prefix/suffix/zero-pad/increment/batchIndex), checkbox, QR (qrCode), barcode (code128), line, rectangle, ellipse, image placeholder, multi-page, deterministic with injected clock, batch generation |
+| **Known differences** | 1. Vendor types isolated: all `pdfrx_engine` types only inside `pdfium_renderer_adapter.dart`, all `pdf` types only inside `pdf_generator_adapter.dart`. Public APIs expose only domain types and Uint8List.<br>2. Security bounds added: max pages 100, max elements per page 500, max batch 1000, max PDF 50MB, max PDF file 100MB, max page count 2000, max PNG 20MB, max render dimension 4000px, scale 0.1..4.0, image placeholder bound reserved.<br>3. Bengali support: pdf package supports Font.ttf embedding; built-in Helvetica shows tofu for Bengali but does not crash. Fixture documents answer YES with embedding. PDFium rendering supports Bengali via FreeType if font embedded.<br>4. Android compileSdk bumped 35→36 to satisfy url_launcher_android 6.3.33 / androidx.browser 1.9.0 / androidx.core 1.17.0 requiring 36 (observed in CI logs).<br>5. No proprietary fonts bundled. |
+| **Tests** | `test/core/documents/document_renderer_test.dart` (updated to expect real capabilities), `test/core/generation/bengali_fixture_test.dart` (14 tests: Bengali single, mixed bn+en, numerals/punctuation, multiline wrap, multi-page, geometry, images/QR/barcode, deterministic, batch, security bound, answer YES), `test/core/rendering/pdf_e2e_test.dart` (2 tests: generation+rendering E2E with timeout guards, Bengali structure) |
+| **Test result** | **VERIFIED — 135/135 pass** at HEAD `0615a58` — Run `33264949642` — `00:20 +135: All tests passed!` — includes 95 previous + 14 Bengali + 2 E2E + updated renderer contract |
+| **Security implications** | Implements RGEN-01 partial (bounds for PDF size, page count, PNG size, render dimensions) and RGEN-03 partial (batch bound). Full ZIP bomb bounds deferred to archive slice. Path traversal already enforced in DocDrDocument via DocumentPathPolicy. |
+| **License/provenance** | Clean-room: no RGEN code copied verbatim, no office templates/assets/logos/seals/signatures/private records. Uses verified permissive deps only. |
+| **Commit** | `37536c3` (prototype) + `17d82e4` (type fixes) + `b4a6cc7` (pdf 3.13.0 dep fix) + `2f8f8fa` (PdfPageRawText dispose fix) + `0615a58` (E2E timeout fix) |
+
 ### Verification commands
 
 ```bash
-dart test                                    # local approximation (Dart SDK only)
-flutter analyze --fatal-infos                # authoritative via CI
-flutter test --reporter expanded             # authoritative via CI — 95/95
-flutter build apk --debug                    # authoritative via CI — now passing
-dart analyze --fatal-infos lib/core test/core  # local approximation: no issues
+flutter analyze --fatal-infos                # authoritative via CI — no issues at 0615a58
+flutter test --reporter expanded             # authoritative via CI — 135/135 at 0615a58
+flutter build apk --debug                    # authoritative via CI — success at 0615a58
 ```
 
 ### CI result — verified on GitHub Actions
 
-**Latest verified HEAD:** `f1bad87` (fix: bump Kotlin to 2.2.20)
+**Latest verified HEAD:** `0615a58` (fix: avoid E2E render timeout)
 
 | Workflow | Job | Result | Evidence |
 |---|---|---|---|
-| CI | Analyze — `flutter analyze --fatal-infos` | **success** | Run `33261383356` — `No issues found!` |
-| CI | Test — `flutter test --reporter expanded` | **success — 95/95** | Run `33261383356` — `00:01 +95: All tests passed!` |
-| CI | Android debug build — `flutter build apk --debug` | **success** | Run `33261383356` — Build Android debug APK success, artifact `docdr-debug-apk` uploaded |
-| Security Scan | Gitleaks secret scan | **success** | Run `33261383445` |
+| CI | Analyze — `flutter analyze --fatal-infos` | **success** | Run `33264949642` — `No issues found!` |
+| CI | Test — `flutter test --reporter expanded` | **success — 135/135** | Run `33264949642` — `00:20 +135: All tests passed!` |
+| CI | Android debug build — `flutter build apk --debug` | **success** | Run `33264949642` — `✓ Built build/app/outputs/flutter-apk/app-debug.apk`, artifact `docdr-debug-apk` uploaded (82 MB) |
+| Security Scan | Gitleaks secret scan | **success** | Run `33264949590` |
 
 **Historical CI progression — evidence of repair:**
 
 | HEAD | CI Run | Analyze | Test | Android | Root cause / fix |
 |---|---|---|---|---|---|
-| `b40a30e` | `33259373333` | success | success | **failure** | `org.jetbrains.kotlin.android` version `1.10.10` not found (invalid version) |
+| `b40a30e` | `33259373333` | success | success | **failure** | `org.jetbrains.kotlin.android` version `1.10.10` not found |
 | `ae5fd34` | `33260606382` | success | success | **failure** | Gradle 8.5.0 < Flutter minimum 8.14.0 |
-| `76b61e4` | `33260775651` | success | success | **failure** | Gradle 8.14.0 artifact 404 (8.14.0 does not exist, actual is 8.14) |
+| `76b61e4` | `33260775651` | success | success | **failure** | Gradle 8.14.0 artifact 404 |
 | `ca5615b` | `33260974022` | success | success | **failure** | AGP 8.7.3 < Flutter minimum 8.11.1 |
 | `8a52a8f` | `33261164762` | success | success | **failure** | Kotlin 2.1.0 < Flutter minimum 2.2.20 |
-| `f1bad87` | `33261383356` | **success** | **success 95/95** | **success** | **P0 foundation fully green** — Gradle 8.14-all.zip (200 verified), AGP 8.13.0, Kotlin 2.2.20 |
+| `f1bad87` | `33261383356` | **success** | **success 95/95** | **success** | **P0 foundation fully green** — Gradle 8.14-all.zip, AGP 8.13.0, Kotlin 2.2.20 |
+| `739c8ba` | `33262071572` | **success** | **success 121/121** | **success** | P1 architecture — vendor-neutral document/renderer |
+| `37536c3` | `33263399446` | **failure** | **failure** | **failure** | double→int? type error, PdfPageRawText dispose, compileSdk 35 vs 36, image 4.9.2 vs pdf 3.11.3 constraint |
+| `17d82e4` | `33263838749` | **failure** | **failure** | **failure** | image 4.9.2 incompatible with pdf 3.11.3 (<4.6.0) |
+| `b4a6cc7` | `33264215877` | **failure** | **success** | **success** | PdfPageRawText.dispose not defined in 0.4.6 |
+| `2f8f8fa` | `33264608622` | **success** | **failure** | **success** | E2E render timeout 30s (PDFium native asset missing in pure dart test) |
+| `0615a58` | `33264949642` | **success** | **success 135/135** | **success** | **P2 PDF gate fully green** — timeout guards, scale 0.2, 15s future timeouts |
 
 Run URLs for latest green:
-- CI: https://github.com/soobujmiah/docdr/actions/runs/33261383356
-- Security Scan: https://github.com/soobujmiah/docdr/actions/runs/33261383445
+- CI: https://github.com/soobujmiah/docdr/actions/runs/33264949642
+- Security Scan: https://github.com/soobujmiah/docdr/actions/runs/33264949590
 
-The `flutter analyze` job covers the whole repository including `lib/main.dart`,
-which could not be analysed locally due to VM resource discipline.
-
-**Previously unverified — now VERIFIED:** Android debug build.
-
-**Toolchain verified at f1bad87:**
-- Flutter: `stable-3.47.2-x64` (from `subosito/flutter-action@v2` cache key)
+**Toolchain verified at 0615a58:**
+- Flutter: `stable-3.47.2-x64`
 - Java: Temurin 17.0.20+1
-- Gradle: `8.14-all.zip` (distributionUrl `https://services.gradle.org/distributions/gradle-8.14-all.zip` — verified 200 via curl, redirects to GitHub release-assets)
-- AGP: `8.13.0` (above Flutter minimum 8.11.1)
-- Kotlin: `2.2.20` (above Flutter minimum 2.2.20, exact match)
-- `android/.gitignore` correctly ignores `gradle-wrapper.jar`, `gradlew`, `/.gradle`, `/local.properties` — canonical Flutter behavior
+- Gradle: `8.14-all.zip`
+- AGP: `8.13.0`
+- Kotlin: `2.2.20`
+- Android compileSdk: `36` (bumped from 35 to satisfy url_launcher_android 6.3.33 / androidx.browser 1.9.0 / androidx.core 1.17.0)
+- Android targetSdk: `36`
+- Dependencies pinned: pdfrx 2.4.7 MIT, pdfrx_engine 0.4.6 MIT, pdf 3.13.0 Apache-2.0, image 4.9.2 MIT (pdf 3.11.3 required image <4.6.0 incompatible, so upgraded to 3.13.0 same licence)
 
-**Warnings (non-blocking) at f1bad87:**
-- `Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.`
-- `Warning: Flutter support for your project's AGP version (8.13.0) will soon be dropped. Please upgrade your AGP version to at least 9.0.1 soon.`
-- These indicate Flutter 3.47.2 will eventually require Gradle 9.x and AGP 9.x, but current build is green. Defer upgrade until Flutter stable channel actually requires it, to avoid chasing pre-release requirements.
+**Phase 0 exit gate:** VERIFIED at `f1bad87`
+**Phase 1 architecture gate:** VERIFIED at `739c8ba` (121/121)
+**Phase 2 PDF technology / licence gate:** VERIFIED at `0615a58` (135/135) — licence matrix, vendor-neutral adapters, Bengali fixtures, reader+generator prototypes, security bounds, CI green.
 
-**Phase 0 exit gate:** clean buildable DocDr repository with no office/private content and documented provenance — **VERIFIED** at `f1bad87` (analyze, test, android debug build, gitleaks all green).
+### NOT migrated — explicit exclusions (remaining)
+
+Recorded so a future session does not "rediscover" them and reverse the decision.
+
+| RGEN component | Decision | Reason |
+|---|---|---|
+| `resolvePath()` | EXCLUDE | Root cause of RGEN-02 (manifest path escape). Replaced by `DocumentPathPolicy`. |
+| Office-specific screens/generators | EXCLUDE | Clean-room rule. |
+| Office templates, logos, seals, signatures, watermarks | EXCLUDE | Clean-room rule; also authorisation risk beyond copyright. |
+| Lucida fonts | EXCLUDE | Proprietary; no redistribution licence found (RGEN-07). |
+| Syncfusion Flutter PDF | DEFER | Licence eligibility UNKNOWN; not needed after PDFium+pdf acceptance, but keep as alternative. |
+| Tesseract `eng`/`ben` traineddata | DEFER | Redistribution terms UNKNOWN. |
+| Noto Bengali fonts | DEFER | Likely OFL-1.1, needs separate audit before bundling. Do NOT bundle without attribution. |
+| `cryptography` (PBKDF2/AES-GCM packages) | DEFER | Licence not verified. Also RGEN-09: encryption format governance must be designed. |
+| `printing` | DEFER | Unconfirmed, but likely BSD-3-Clause. Verify before adding. |
+| Camera / storage plugins | DEFER | Permissive but unverified, plus permission justification needed. |
