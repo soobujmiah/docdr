@@ -3,7 +3,8 @@
 **Milestone:** DocDr becomes a buildable, testable, evidence-backed repository
 **Date:** 2026-08-29
 **Commit:** `9f22f91`
-**Score:** 68 tests, all passing
+**Score:** 95 tests, all passing
+**Licence decision:** PROPRIETARY - all rights reserved (`LICENSE`)
 
 This record follows the contract in `KNOWLEDGE_FLOW.md`: after a meaningful
 milestone, return what changed, why, verified behaviour, evidence, decisions,
@@ -46,6 +47,18 @@ engineering foundation.
   the CSV/XLSX mapping UI depend on, so its absence would have surfaced as a
   design gap during P1 rather than as a test failure.
 
+**Local persistence (next slice)**
+- `lib/core/storage/template_store.dart` ports RGEN's store contract with
+  **zero third-party dependencies**. Template directories, manifest handling,
+  asset import, duplication and deletion.
+- Closes the **storage half of DOC-05**: `resolveAssetPath()` re-validates the
+  path and then enforces absolute containment, walking each component so a
+  symbolic link cannot escape the template directory.
+- Adds complexity limits (pages, elements per page, asset bytes, manifest
+  bytes), partially pre-empting RGEN-04.
+- Portable ZIP packages and password-protected packages are **deferred**, not
+  built: `archive` and `cryptography` are not licence-cleared.
+
 **Process**
 - `.github/workflows/ci.yml` (analyze + test) and `security.yml` (Gitleaks).
 - `LICENSE` and `THIRD_PARTY_NOTICES.md`.
@@ -74,6 +87,8 @@ engineering foundation.
 | `flutter test` passes — **68/68** | GitHub Actions run `33258158299`, Test job: `00:00 +68: All tests passed!` | VERIFIED |
 | Gitleaks secret scan passes on full history | GitHub Actions run `33258158311` | VERIFIED |
 | `lib/main.dart` passes analysis | Covered by the CI Analyze job (whole repository) | VERIFIED |
+| Template save/load/list/delete/duplicate | 27 storage tests over real `dart:io` temp directories | VERIFIED |
+| Asset paths cannot escape the template directory | Containment tests incl. a **symlink escape** attempt | VERIFIED |
 | Clean-room rule holds | No office, institutional, signature, seal or personal content | VERIFIED |
 
 **Correction to a prior finding.** DOC-09 originally described the redo stack
@@ -147,9 +162,11 @@ it)**
 
 **Owner decisions pending**
 
-7. **Licence selection** (blocking for public release). See `LICENSE`.
+7. ~~Licence selection~~ **DECIDED: proprietary, all rights reserved.**
 8. **Publisher identity**: application ID, keystore, and whether DocDr is
    intended for Play distribution.
+9. **Android build**: run `flutter create --platforms=android .` so the only
+   remaining unverified foundation piece has passing evidence.
 
 **Standing discipline**
 

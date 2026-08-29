@@ -97,6 +97,20 @@ Unknowns are recorded, never omitted or assumed.
 | **License/provenance** | Original DocDr code. |
 | **Commit** | `9f22f91` |
 
+### Slice 4 — `template_store.dart` (local persistence)
+
+| Field | Record |
+|---|---|
+| **Source** | `rgen` `android_app/lib/services/custom_template_store.dart` @ `9cd0e02` (397 lines). Contract ported: self-contained template directory, `template.json` manifest, pretty-printed JSON, id generation (timestamp + random hex), `listTemplates` skipping damaged packages, `load`, `save` (refreshing `updatedAt`), `createBlank`, `importAsset` with filename sanitizing, `delete`, `duplicate`. |
+| **Target** | `lib/core/storage/template_store.dart` |
+| **Preserved behavior** | Template directory layout; manifest name and 2-space-indented JSON; newest-first listing that tolerates one damaged package; blank A4 template; asset import returning a template-relative path; destructive delete; duplication with a ` Copy` suffix and a new id. |
+| **Known differences** | 1. **No third-party dependencies.** RGEN's store used `archive`, `cryptography`, `image`, `printing`, `path_provider` and Syncfusion Flutter PDF; none are licence-cleared yet, so this implementation is `dart:io` only.<br>2. **Portable ZIP export/import is DEFERRED** to the slice that clears `archive`. `duplicate()` copies the directory tree directly instead of round-tripping through a ZIP.<br>3. **Password-protected packages are DEFERRED** (RGEN-09 / `cryptography` not cleared).<br>4. PDF/image background import is DEFERRED (needs a cleared PDF engine).<br>5. The store receives its root `Directory` from the caller instead of calling `path_provider`, keeping the core testable on a plain Dart VM.<br>6. New: complexity limits (pages, elements per page, asset bytes, manifest bytes) and mandatory asset-path containment. |
+| **Tests** | `test/core/storage/template_store_test.dart` — save/load round trip, listing order and damaged-package tolerance, blank creation, asset import and sanitizing, asset-path containment (traversal, absolute, empty, **symlink escape**), complexity limits, delete, duplicate independence. |
+| **Test result** | **VERIFIED — 95/95 pass** (68 previous + 27 new). `dart analyze --fatal-infos`: **no issues** on `lib/core` and `test`. |
+| **Security implications** | Closes the **storage half of DOC-05**: `resolveAssetPath()` re-validates through `DocumentPathPolicy` and then enforces absolute containment, walking each component so a symbolic link cannot escape the template directory. `basePath` is required to sit inside the store root. Partially pre-empts **RGEN-04** via complexity limits on save. **RGEN-01** (unbounded archive import) and **RGEN-03** (unbounded batch generation) remain open until the ZIP/batch slices land, and the bounds for them are specified in `TemplateStoreLimits`. |
+| **License/provenance** | Original DocDr code plus a ported behavioural contract. No assets, fonts, models or RGEN code copied verbatim. No new dependency introduced — `archive`, `cryptography`, `image`, `printing` and `path_provider` all remain at **UNKNOWN** in `THIRD_PARTY_NOTICES.md`. |
+PLACEHOLDER
+
 ### NOT migrated — explicit exclusions
 
 Recorded so a future session does not "rediscover" them and reverse the decision.
@@ -109,7 +123,11 @@ Recorded so a future session does not "rediscover" them and reverse the decision
 | Lucida fonts | EXCLUDE | Proprietary; no redistribution licence found (RGEN-07). |
 | Syncfusion Flutter PDF | DEFER | Licence eligibility **UNKNOWN**; must be resolved before introduction. |
 | Tesseract `eng`/`ben` traineddata | DEFER | Redistribution terms **UNKNOWN**. |
-| Any further RGEN component | BLOCKED | Per the architectural rule, no further slices until slice 1 has implementation + regression tests + security review + migration evidence. Slice 1 now satisfies this. |
+| Any further RGEN component | BLOCKED | Per the architectural rule, no further slices until a component has implementation + regression tests + security review + migration evidence. Slices 1-4 now satisfy this. |
+| `archive` (ZIP portable packages) | DEFER | Licence not verified. Required for export/import of `.docdr` packages; **RGEN-01 bounds must be implemented in that slice**. |
+| `cryptography` (PBKDF2/AES-GCM packages) | DEFER | Licence not verified. Also RGEN-09: encryption format governance (KDF parameters, password policy) must be designed, not just ported. |
+| `image` + `printing` + Syncfusion PDF (background import) | DEFER | All licence-gated; Syncfusion eligibility is UNKNOWN and is the critical path for rendering. |
+| `path_provider` | DEFER | Permissive but unverified. Needed only at the application layer to supply the store root. |
 
 ### Verification commands
 
