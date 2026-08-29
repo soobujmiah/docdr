@@ -30,7 +30,6 @@ class PdfGeneratorAdapter implements DocumentGenerator {
   static const int _maxPages = 100;
   static const int _maxElementsPerPage = 500;
   static const int _maxBatchSize = 1000;
-  static const int _maxImageBytes = 10 * 1024 * 1024;
 
   @override
   String get engineName => 'pdf';

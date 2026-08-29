@@ -20,9 +20,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  pdfrx: ^2.4.7
-  pdf: ^3.11.3
-  image: ^4.9.2
+  # Pinned exact versions per licence gate to avoid unverified transitive (material_ui in pdfrx 2.5.0)
+  pdfrx: 2.4.7
+  pdfrx_engine: 0.4.6
+  pdf: 3.11.3
+  image: 4.9.2
 
 dev_dependencies:
   flutter_test:

@@ -115,6 +115,7 @@ void main() {
           fail('Renderer still reports licence gate after verification: $e');
         }
         // For local VM without flutter, we skip rendering part but generation part already passed
+        // ignore: avoid_print
         print('PDFium native not available in this test env (expected locally), skipping render check: $e');
       }
     });

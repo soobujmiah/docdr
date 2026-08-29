@@ -166,21 +166,23 @@ class PdfiumRendererAdapter implements DocumentRenderer {
         );
       }
 
-      final renderWidth = (widthPoints * boundedScale).clamp(1, 4000).toDouble();
-      final renderHeight = (heightPoints * boundedScale).clamp(1, 4000).toDouble();
+      final renderWidthInt =
+          (widthPoints * boundedScale).clamp(1, 4000).toInt();
+      final renderHeightInt =
+          (heightPoints * boundedScale).clamp(1, 4000).toInt();
 
       if (!includeImage) {
         return RenderedPage(
           pageIndex: pageIndex,
-          width: renderWidth,
-          height: renderHeight,
+          width: renderWidthInt.toDouble(),
+          height: renderHeightInt.toDouble(),
           imageBytes: null,
         );
       }
 
       final pageImage = await page.render(
-        width: renderWidth,
-        height: renderHeight,
+        width: renderWidthInt,
+        height: renderHeightInt,
       );
       if (pageImage == null) {
         throw const DocumentRenderException('failed to render page image');
@@ -199,8 +201,8 @@ class PdfiumRendererAdapter implements DocumentRenderer {
         }
         return RenderedPage(
           pageIndex: pageIndex,
-          width: renderWidth,
-          height: renderHeight,
+          width: renderWidthInt.toDouble(),
+          height: renderHeightInt.toDouble(),
           imageBytes: pngBytes,
         );
       } finally {
@@ -231,9 +233,9 @@ class PdfiumRendererAdapter implements DocumentRenderer {
       }
       final page = doc.pages[pageIndex];
       final text = await page.loadText();
-      // text is PdfPageText
-      final all = text.fullText;
-      text.dispose();
+      // text is PdfPageText — fullText may be nullable in newer API
+      final all = text?.fullText ?? '';
+      text?.dispose();
       return all;
     } catch (e) {
       if (e is DocumentRenderException) rethrow;
