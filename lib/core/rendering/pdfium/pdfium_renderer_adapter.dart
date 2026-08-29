@@ -233,10 +233,9 @@ class PdfiumRendererAdapter implements DocumentRenderer {
       }
       final page = doc.pages[pageIndex];
       final text = await page.loadText();
-      // text is PdfPageText — fullText may be nullable in newer API
-      final all = text?.fullText ?? '';
-      text?.dispose();
-      return all;
+      // PdfPageRawText in pdfrx_engine 0.4.6 has no dispose, fullText is non-nullable
+      if (text == null) return '';
+      return text.fullText;
     } catch (e) {
       if (e is DocumentRenderException) rethrow;
       throw DocumentRenderException('extractText failed: $e', cause: e);
