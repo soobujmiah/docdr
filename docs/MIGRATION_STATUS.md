@@ -157,35 +157,48 @@ Recorded so a future session does not "rediscover" them and reverse the decision
 | **License/provenance** | Clean-room: no RGEN code copied verbatim, no office templates/assets/logos/seals/signatures/private records. Uses verified permissive deps only. |
 | **Commit** | `37536c3` (prototype) + `17d82e4` (type fixes) + `b4a6cc7` (pdf 3.13.0 dep fix) + `2f8f8fa` (PdfPageRawText dispose fix) + `0615a58` (E2E timeout fix) |
 
+### Slice 7 — PDF/Image Import Boundary (BackgroundImportService)
+
+| Field | Record |
+|---|---|
+| **Source** | RGEN `custom_template_store.dart` `importAsset` contract (397 lines) @ `9cd0e02` — preserve sanitizing, containment, but add type-specific validation for PDF/image background |
+| **Target** | `lib/core/services/background_import_service.dart` (new service), `test/core/storage/background_import_test.dart` (15 tests) |
+| **Preserved behavior** | Asset import returning template-relative path, filename sanitizing `[A-Za-z0-9._-]`, containment via `resolveAssetPath` symlink check, `basePath` inside store root, template save with updated `backgroundType` and `backgroundPath` |
+| **Known differences** | 1. **New service layer:** `BackgroundImportService` takes `DocDrTemplateStore` + `DocumentRenderer` (vendor-neutral interface) — no pdfrx types leak outside adapter. Image validation via `image` 4.9.2 MIT (already verified) inside service.<br>2. **Security bounds added beyond RGEN:** file existence + isFile, extension whitelist (.pdf for PDF, .png/.jpg/.jpeg for image), size <=32MB store limit + 100MB absolute PDF / 32MB image, header `%PDF-` check, page count <=2000 via renderer with 15s timeout guard (FakeRenderer in tests to avoid native dependency), image decode via `image` package with dimension <=8000, empty file rejection, sanitized filename via `_safeName`, traversal check via DocumentPathPolicy, containment via `resolveAssetPath`.<br>3. **Bengali filename handling:** `_safeName` sanitizes to safe chars, so Bengali filename becomes safe ASCII but import still succeeds — tested.<br>4. **Testability:** Uses `FakeRenderer` that validates %PDF- header and counts pages without native PDFium, so tests run on pure Dart VM without native asset, with timeout guards. |
+| **Tests** | `test/core/storage/background_import_test.dart` — 15 tests: valid PDF import sets backgroundType pdf + relative path + asset exists, oversized PDF rejected (store limit 10 bytes), invalid extension rejected, file without %PDF- header rejected, empty PDF rejected, page not found rejected, Bengali filename sanitized but succeeds, valid PNG import sets backgroundType image, valid JPG import, oversized image dimensions 9000x100 rejected, corrupt image rejected, invalid extension rejected, Bengali image filename sanitized, traversal sanitized not escaped, resolveAssetPath containment after import |
+| **Test result** | **VERIFIED — 150/150 pass** at HEAD `f80b1df` — Run `33266987543` — `00:18 +150: All tests passed!` — includes 135 previous +15 new |
+| **Security implications** | Closes **deferred item from Slice 4:** "PDF/image background import DEFERRED (needs cleared PDF engine)" — now engine cleared and implemented with bounds. Enforces file-size, page-count, dimensions, header, decode, traversal, symlink escape. No new permissions, no MANAGE_EXTERNAL_STORAGE, no INTERNET. |
+| **License/provenance** | No new deps — uses already verified `pdfrx` 2.4.7 MIT via DocumentRenderer interface, `image` 4.9.2 MIT for decode, `pdf` 3.13.0 Apache-2.0 for fixtures in tests. Clean-room, no RGEN code copied verbatim, no office assets. |
+| **Commit** | `d8c7ef6` (feat import) + `f80b1df` (fix analyze unused imports) |
+
 ### Verification commands
 
 ```bash
-flutter analyze --fatal-infos                # authoritative via CI — no issues at 0615a58 and 94c67b3
-flutter test --reporter expanded             # authoritative via CI — 135/135 at 0615a58 and 94c67b3
-flutter build apk --debug                    # authoritative via CI — success at 0615a58 and 94c67b3
+flutter analyze --fatal-infos                # authoritative via CI — no issues at f80b1df (150/150)
+flutter test --reporter expanded             # authoritative via CI — 150/150 at f80b1df
+flutter build apk --debug                    # authoritative via CI — success at f80b1df
 ```
 
 ### CI result — verified on GitHub Actions
 
-**Latest verified HEAD:** `94c67b3` (docs: update migration status and knowledge return for PDF gate 0615a58) — code green at `0615a58`
+**Latest verified HEAD:** `f80b1df` (fix: remove unused imports) — code green with Slice 7, 150/150
 
-**Current canonical HEAD `94c67b3` — docs-only update on top of `0615a58`:**
-
-| Workflow | Job | Result | Evidence |
-|---|---|---|---|
-| CI | Analyze — `flutter analyze --fatal-infos` | **success** | Run `33265391686` — `No issues found!` (job 99134442647) |
-| CI | Test — `flutter test --reporter expanded` | **success — 135/135** | Run `33265391686` — `00:20 +135: All tests passed!` (job 99134442679) |
-| CI | Android debug build — `flutter build apk --debug` | **success** | Run `33265391686` — APK built (job 99134442566) |
-| Security Scan | Gitleaks secret scan | **success** | Run `33265391713` |
-
-**Previous code green HEAD `0615a58` (fix: avoid E2E render timeout):**
+**Current canonical HEAD `f80b1df` — Slice 7 PDF/image import boundary:**
 
 | Workflow | Job | Result | Evidence |
 |---|---|---|---|
-| CI | Analyze — `flutter analyze --fatal-infos` | **success** | Run `33264949642` — `No issues found!` |
-| CI | Test — `flutter test --reporter expanded` | **success — 135/135** | Run `33264949642` — `00:20 +135: All tests passed!` |
-| CI | Android debug build — `flutter build apk --debug` | **success** | Run `33264949642` — `✓ Built build/app/outputs/flutter-apk/app-debug.apk`, artifact `docdr-debug-apk` uploaded (82 MB) |
-| Security Scan | Gitleaks secret scan | **success** | Run `33264949590` |
+| CI | Analyze — `flutter analyze --fatal-infos` | **success** | Run `33266987543` — `No issues found! (ran in 9.9s)` |
+| CI | Test — `flutter test --reporter expanded` | **success — 150/150** | Run `33266987543` — `00:18 +150: All tests passed!` |
+| CI | Android debug build — `flutter build apk --debug` | **success** | Run `33266987543` — APK built |
+| Security Scan | Gitleaks secret scan | **success** | Run `33266987572` |
+
+**Previous HEADs:**
+
+| HEAD | CI Run | Result | Evidence |
+|---|---|---|---|
+| `3d01e67` | `33266322084` | **success 135/135** | Docs reconciliation — ledger truth fix, no code change |
+| `94c67b3` | `33265391686` | **success 135/135** | Docs update on top of 0615a58 |
+| `0615a58` | `33264949642` | **success 135/135** | P2 PDF gate fully green |
 
 **Historical CI progression — evidence of repair:**
 
@@ -203,27 +216,32 @@ flutter build apk --debug                    # authoritative via CI — success 
 | `b4a6cc7` | `33264215877` | **failure** | **success** | **success** | PdfPageRawText.dispose not defined in 0.4.6 |
 | `2f8f8fa` | `33264608622` | **success** | **failure** | **success** | E2E render timeout 30s (PDFium native asset missing in pure dart test) |
 | `0615a58` | `33264949642` | **success** | **success 135/135** | **success** | **P2 PDF gate fully green** — timeout guards, scale 0.2, 15s future timeouts |
-| `94c67b3` | `33265391686` | **success** | **success 135/135** | **success** | **Docs update on top of 0615a58** — same code, ledger reconciliation, still green |
+| `94c67b3` | `33265391686` | **success** | **success 135/135** | **success** | **Docs update on top of 0615a58** — same code, ledger reconciliation |
+| `3d01e67` | `33266322084` | **success** | **success 135/135** | **success** | **Ledger truth fix** — THIRD_PARTY_NOTICES.md bundled deps correction |
+| `d8c7ef6` | `33266733370` | **failure** | **success** | **success** | Analyze failure: 2 unused imports (background_import_service.dart, background_import_test.dart) |
+| `f80b1df` | `33266987543` | **success** | **success 150/150** | **success** | **Slice 7 PDF/image import boundary** — BackgroundImportService + 15 tests, analyze clean |
 
 Run URLs for latest green:
+- CI f80b1df: https://github.com/soobujmiah/docdr/actions/runs/33266987543
+- Security f80b1df: https://github.com/soobujmiah/docdr/actions/runs/33266987572
+- CI 3d01e67: https://github.com/soobujmiah/docdr/actions/runs/33266322084
 - CI 94c67b3: https://github.com/soobujmiah/docdr/actions/runs/33265391686
-- Security 94c67b3: https://github.com/soobujmiah/docdr/actions/runs/33265391713
 - CI 0615a58: https://github.com/soobujmiah/docdr/actions/runs/33264949642
-- Security 0615a58: https://github.com/soobujmiah/docdr/actions/runs/33264949590
 
-**Toolchain verified at 0615a58 and 94c67b3 (same code):**
+**Toolchain verified at f80b1df (same as 0615a58/94c67b3/3d01e67):**
 - Flutter: `stable-3.47.2-x64`
 - Java: Temurin 17.0.20+1
 - Gradle: `8.14-all.zip`
 - AGP: `8.13.0`
 - Kotlin: `2.2.20`
-- Android compileSdk: `36` (bumped from 35 to satisfy url_launcher_android 6.3.33 / androidx.browser 1.9.0 / androidx.core 1.17.0)
+- Android compileSdk: `36`
 - Android targetSdk: `36`
-- Dependencies pinned: pdfrx 2.4.7 MIT, pdfrx_engine 0.4.6 MIT, pdf 3.13.0 Apache-2.0, image 4.9.2 MIT (pdf 3.11.3 required image <4.6.0 incompatible, so upgraded to 3.13.0 same licence)
+- Dependencies pinned: pdfrx 2.4.7 MIT, pdfrx_engine 0.4.6 MIT, pdf 3.13.0 Apache-2.0, image 4.9.2 MIT
 
 **Phase 0 exit gate:** VERIFIED at `f1bad87`
 **Phase 1 architecture gate:** VERIFIED at `739c8ba` (121/121)
-**Phase 2 PDF technology / licence gate:** VERIFIED at `0615a58` (135/135) — licence matrix, vendor-neutral adapters, Bengali fixtures, reader+generator prototypes, security bounds, CI green. Re-verified at `94c67b3` docs update — same code green (Analyze/Test/Android success, Security success).
+**Phase 2 PDF technology / licence gate:** VERIFIED at `0615a58` (135/135) — re-verified at `94c67b3`, `3d01e67`, `f80b1df` still green
+**Phase 3 Slice 7 PDF/image import boundary:** VERIFIED at `f80b1df` (150/150) — BackgroundImportService, security bounds, Bengali filename handling, vendor-neutral, no new deps
 
 ### NOT migrated — explicit exclusions (remaining)
 
