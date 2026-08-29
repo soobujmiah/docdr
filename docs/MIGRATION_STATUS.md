@@ -160,14 +160,25 @@ Recorded so a future session does not "rediscover" them and reverse the decision
 ### Verification commands
 
 ```bash
-flutter analyze --fatal-infos                # authoritative via CI — no issues at 0615a58
-flutter test --reporter expanded             # authoritative via CI — 135/135 at 0615a58
-flutter build apk --debug                    # authoritative via CI — success at 0615a58
+flutter analyze --fatal-infos                # authoritative via CI — no issues at 0615a58 and 94c67b3
+flutter test --reporter expanded             # authoritative via CI — 135/135 at 0615a58 and 94c67b3
+flutter build apk --debug                    # authoritative via CI — success at 0615a58 and 94c67b3
 ```
 
 ### CI result — verified on GitHub Actions
 
-**Latest verified HEAD:** `0615a58` (fix: avoid E2E render timeout)
+**Latest verified HEAD:** `94c67b3` (docs: update migration status and knowledge return for PDF gate 0615a58) — code green at `0615a58`
+
+**Current canonical HEAD `94c67b3` — docs-only update on top of `0615a58`:**
+
+| Workflow | Job | Result | Evidence |
+|---|---|---|---|
+| CI | Analyze — `flutter analyze --fatal-infos` | **success** | Run `33265391686` — `No issues found!` (job 99134442647) |
+| CI | Test — `flutter test --reporter expanded` | **success — 135/135** | Run `33265391686` — `00:20 +135: All tests passed!` (job 99134442679) |
+| CI | Android debug build — `flutter build apk --debug` | **success** | Run `33265391686` — APK built (job 99134442566) |
+| Security Scan | Gitleaks secret scan | **success** | Run `33265391713` |
+
+**Previous code green HEAD `0615a58` (fix: avoid E2E render timeout):**
 
 | Workflow | Job | Result | Evidence |
 |---|---|---|---|
@@ -192,12 +203,15 @@ flutter build apk --debug                    # authoritative via CI — success 
 | `b4a6cc7` | `33264215877` | **failure** | **success** | **success** | PdfPageRawText.dispose not defined in 0.4.6 |
 | `2f8f8fa` | `33264608622` | **success** | **failure** | **success** | E2E render timeout 30s (PDFium native asset missing in pure dart test) |
 | `0615a58` | `33264949642` | **success** | **success 135/135** | **success** | **P2 PDF gate fully green** — timeout guards, scale 0.2, 15s future timeouts |
+| `94c67b3` | `33265391686` | **success** | **success 135/135** | **success** | **Docs update on top of 0615a58** — same code, ledger reconciliation, still green |
 
 Run URLs for latest green:
-- CI: https://github.com/soobujmiah/docdr/actions/runs/33264949642
-- Security Scan: https://github.com/soobujmiah/docdr/actions/runs/33264949590
+- CI 94c67b3: https://github.com/soobujmiah/docdr/actions/runs/33265391686
+- Security 94c67b3: https://github.com/soobujmiah/docdr/actions/runs/33265391713
+- CI 0615a58: https://github.com/soobujmiah/docdr/actions/runs/33264949642
+- Security 0615a58: https://github.com/soobujmiah/docdr/actions/runs/33264949590
 
-**Toolchain verified at 0615a58:**
+**Toolchain verified at 0615a58 and 94c67b3 (same code):**
 - Flutter: `stable-3.47.2-x64`
 - Java: Temurin 17.0.20+1
 - Gradle: `8.14-all.zip`
@@ -209,7 +223,7 @@ Run URLs for latest green:
 
 **Phase 0 exit gate:** VERIFIED at `f1bad87`
 **Phase 1 architecture gate:** VERIFIED at `739c8ba` (121/121)
-**Phase 2 PDF technology / licence gate:** VERIFIED at `0615a58` (135/135) — licence matrix, vendor-neutral adapters, Bengali fixtures, reader+generator prototypes, security bounds, CI green.
+**Phase 2 PDF technology / licence gate:** VERIFIED at `0615a58` (135/135) — licence matrix, vendor-neutral adapters, Bengali fixtures, reader+generator prototypes, security bounds, CI green. Re-verified at `94c67b3` docs update — same code green (Analyze/Test/Android success, Security success).
 
 ### NOT migrated — explicit exclusions (remaining)
 

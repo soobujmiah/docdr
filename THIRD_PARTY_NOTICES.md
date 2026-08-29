@@ -24,23 +24,30 @@ application.
 
 ---
 
-## Currently bundled at HEAD 739c8ba (P1 architecture)
+## Currently bundled at HEAD 94c67b3 (code green 0615a58) — P2 PDF gate
 
-DocDr's `pubspec.yaml` at P1 still declares **no third-party runtime
-dependencies** — only Flutter/Dart SDK and dev-only test tooling. This is
-intentional for the licence gate: verification precedes introduction.
+At P1 HEAD `739c8ba`, `pubspec.yaml` declared **no third-party runtime dependencies** — only Flutter/Dart SDK and dev-only test tooling. That was intentional for the licence gate: verification precedes introduction.
 
-| Dependency | Scope | Licence | Status |
-|---|---|---|---|
-| Flutter / Dart SDK | runtime | BSD-3-Clause (with components under other permissive licences) | UNVERIFIED (well-known, to be confirmed before public release) |
-| `package:test` | dev | BSD-3-Clause | UNVERIFIED |
-| `flutter_lints` | dev | BSD-3-Clause | UNVERIFIED |
+At P2 HEAD `0615a58` (docs update `94c67b3`), the verified PDF stack **is now bundled** in `pubspec.yaml`:
 
-> `UNVERIFIED` here means "very likely permissive and well known, but not
-> confirmed in writing during this session". Confirm before first public
-> release; these are dev/build dependencies and do not ship in the APK.
+| Dependency | Exact pinned version at HEAD 94c67b3 | Scope | Licence | Evidence | Status |
+|---|---|---|---|---|---|
+| `pdfrx` | `2.4.7` | runtime | MIT | https://pub.dev/packages/pdfrx/license + GitHub LICENSE | VERIFIED |
+| `pdfrx_engine` | `0.4.6` (transitive via pdfrx 2.4.7) | runtime | MIT | https://pub.dev/packages/pdfrx_engine/license | VERIFIED |
+| `pdf` | `3.13.0` (upgraded from 3.11.3 due to image 4.9.2 constraint, same Apache-2.0) | runtime | Apache-2.0 | https://pub.dev/packages/pdf/license + GitHub LICENSE commit 421183a 2019-02-03 | VERIFIED |
+| `image` | `4.9.2` (required by pdfrx_engine 0.4.6) | runtime | MIT | https://pub.dev/packages/image/license | VERIFIED |
+| Flutter / Dart SDK | SDK | runtime | BSD-3-Clause (with components under other permissive licences) | well-known | UNVERIFIED (to be confirmed before public release, does not ship as third-party) |
+| `package:test` | `^1.25.0` | dev | BSD-3-Clause | well-known | UNVERIFIED (dev only) |
+| `flutter_lints` | `^5.0.0` | dev | BSD-3-Clause | well-known | UNVERIFIED (dev only) |
 
-**Note:** PDF stack has been **VERIFIED** in this audit (see below) but NOT yet added to `pubspec.yaml`. The gate is CLOSED (ACCEPTED) for introduction; next commit may add minimal set.
+> `UNVERIFIED` for SDK/dev means "very likely permissive and well known, but not confirmed in writing during this session". Confirm before first public release; dev deps do not ship in the APK.
+
+**Historical note:** At HEAD `739c8ba`, the note said "PDF stack VERIFIED but NOT yet added". That became outdated at `37536c3` (first prototype) and was resolved at `0615a58` which is CI green with the stack bundled. Current HEAD `94c67b3` is a docs-only update on top of `0615a58` and inherits the same bundled set.
+
+**CI verification for this bundled set:**
+- CI `33264949642` (HEAD `0615a58`): Analyze `No issues found!`, Test `135/135 All tests passed!`, Android debug APK built 82 MB
+- CI `33265391686` (HEAD `94c67b3`): Analyze success, Test success, Android debug build success
+- Security `33264949590` and `33265391713`: success (gitleaks)
 
 ---
 
@@ -99,12 +106,16 @@ All licences are permissive MIT, BSD-3-Clause, or Apache-2.0. No GPL/AGPL/LGPL/S
 - PDFium third-party licence list is version-dependent; must extract LICENSES from built binary or from pdfium_dart repo at integration time and include in final app About screen and in this file's appendix.
 - Bengali font for generation (e.g., Noto Sans Bengali) requires separate OFL-1.1 audit before bundling. Do NOT bundle proprietary fonts.
 
-**Proposed minimal pin for prototype (after this doc):**
+**Actual minimal pin at HEAD 94c67b3 / 0615a58 (after this doc) — verified green:**
 ```yaml
 dependencies:
-  pdfrx: ^2.4.7        # MIT, avoids material_ui dep, includes pdfium_flutter 0.2.3 / pdfium_dart 0.2.5 / PDFium BSD-3-Clause
-  pdf: ^3.11.3         # Apache-2.0, conservative; 3.13.0 also acceptable same licence
+  pdfrx: 2.4.7         # MIT, avoids material_ui dep, includes pdfium_flutter 0.2.3 / pdfium_dart 0.2.5 / PDFium BSD-3-Clause
+  pdfrx_engine: 0.4.6  # MIT, transitive, pinned exact to avoid material_ui
+  pdf: 3.13.0          # Apache-2.0 — upgraded from 3.11.3 because 3.11.3 requires image <4.6.0 incompatible with image 4.9.2 needed by pdfrx_engine 0.4.6; 3.13.0 supports image ^4.8.0+, same licence
+  image: 4.9.2         # MIT, required by pdfrx_engine
 ```
+
+Historical proposal at gate docs time was `pdf: ^3.11.3` conservative; CI failure `17d82e4` revealed incompatibility with `image 4.9.2`, so bumped to `3.13.0` in `b4a6cc7`, verified green at `0615a58` and `94c67b3`.
 
 ### Licence Texts (summarized, full texts in upstream)
 

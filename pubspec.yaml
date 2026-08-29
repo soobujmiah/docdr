@@ -11,18 +11,21 @@ environment:
 # terms must be verified BEFORE it is introduced. See THIRD_PARTY_NOTICES.md
 # and docs/PDF_TECHNOLOGY_EVALUATION.md for licence gate evidence.
 #
-# P2 PDF Technology Gate (2026-08-29) — VERIFIED ACCEPTED:
+# P2 PDF Technology Gate (2026-08-29) — VERIFIED ACCEPTED at 0615a58 and 94c67b3:
 #   - pdfrx 2.4.7 MIT (rendering, PDFium BSD-3-Clause + permissive third-party)
-#   - pdf 3.11.3 Apache-2.0 (generation)
+#   - pdfrx_engine 0.4.6 MIT (transitive)
+#   - pdf 3.13.0 Apache-2.0 (generation) — upgraded from 3.11.3 due to image 4.9.2 constraint, same licence
+#   - image 4.9.2 MIT (required by pdfrx_engine)
 # Both permissive, compatible with PROPRIETARY closed-source with attribution.
 # Transitive deps all MIT/BSD-3-Clause/Apache-2.0, no GPL/AGPL/LGPL.
 # See THIRD_PARTY_NOTICES.md for full matrix and attribution obligations.
+# CI green: 33264949642 (0615a58) and 33265391686 (94c67b3) — Analyze No issues, Test 135/135, Android APK success.
 dependencies:
   flutter:
     sdk: flutter
   # Pinned exact versions per licence gate to avoid unverified transitive (material_ui in pdfrx 2.5.0)
-  # pdf 3.11.3 requires image <4.6.0, incompatible with image 4.9.2 needed by pdfrx_engine 0.4.6,
-  # so use pdf 3.13.0 which supports image ^4.8.0+ (same Apache-2.0 licence, verified)
+  # Historical: pdf 3.11.3 required image <4.6.0, incompatible with image 4.9.2 needed by pdfrx_engine 0.4.6 (CI 17d82e4 failure).
+  # Fixed in b4a6cc7: use pdf 3.13.0 which supports image ^4.8.0+ (same Apache-2.0 licence, verified green at 0615a58 and 94c67b3).
   pdfrx: 2.4.7
   pdfrx_engine: 0.4.6
   pdf: 3.13.0
