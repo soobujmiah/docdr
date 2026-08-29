@@ -1,4 +1,4 @@
-enum DocDrThemeMode { system, light, dark }
+enum DocDrThemeMode { system, light, dark, technology, classic, colorful }
 
 enum DocDrDefaultView { grid, list }
 
