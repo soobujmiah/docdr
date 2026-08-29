@@ -8,19 +8,21 @@ environment:
 
 # Dependency discipline (docs/ENGINEERING_RULES.md):
 # Every dependency must have a documented purpose, and its redistribution
-# terms must be verified BEFORE it is introduced.
+# terms must be verified BEFORE it is introduced. See THIRD_PARTY_NOTICES.md
+# and docs/PDF_TECHNOLOGY_EVALUATION.md for licence gate evidence.
 #
-# Deliberately absent at this stage:
-#   - PDF rendering engines (Syncfusion Flutter PDF, pdf, printing)
-#   - OCR engines / Tesseract traineddata (eng, ben)
-#   - Bundled fonts (Lucida, Noto, calligraphy faces)
-#
-# Reason: RGEN finding RGEN-07 recorded unresolved redistribution/licensing
-# status for exactly these categories. They are NOT introduced here until
-# THIRD_PARTY_NOTICES.md records a verified status for each. See that file.
+# P2 PDF Technology Gate (2026-08-29) — VERIFIED ACCEPTED:
+#   - pdfrx 2.4.7 MIT (rendering, PDFium BSD-3-Clause + permissive third-party)
+#   - pdf 3.11.3 Apache-2.0 (generation)
+# Both permissive, compatible with PROPRIETARY closed-source with attribution.
+# Transitive deps all MIT/BSD-3-Clause/Apache-2.0, no GPL/AGPL/LGPL.
+# See THIRD_PARTY_NOTICES.md for full matrix and attribution obligations.
 dependencies:
   flutter:
     sdk: flutter
+  pdfrx: ^2.4.7
+  pdf: ^3.11.3
+  image: ^4.9.2
 
 dev_dependencies:
   flutter_test:

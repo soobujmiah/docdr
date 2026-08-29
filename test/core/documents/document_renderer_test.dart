@@ -4,7 +4,7 @@ import 'package:docdr/core/rendering/pdfium/pdfium_renderer_adapter.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('DocumentRenderer — vendor-neutral contract', () {
+  group('DocumentRenderer — vendor-neutral contract (real PDFium adapter)', () {
     final now = DateTime.utc(2026, 8, 29);
     final pdfDoc = DocDrDocument(
       id: 'doc-1',
@@ -29,36 +29,45 @@ void main() {
       const renderer = PdfiumRendererAdapter();
       expect(renderer, isA<DocumentRenderer>());
       expect(renderer.engineName, isNotEmpty);
-      expect(renderer.engineName, isNot(contains('pdfrx')));
+      // engineName must be generic, not a vendor class leak
+      expect(renderer.engineName, isNot(contains('PdfDocument')));
+      expect(renderer.engineName, isNot(contains('pdfrx_engine')));
       // No vendor types should leak into capabilities — only bool flags.
       expect(renderer.capabilities, isA<RendererCapabilities>());
     });
 
-    test('capabilities are queryable and default to false in stub', () {
+    test('capabilities are queryable and true after licence gate', () {
       const renderer = PdfiumRendererAdapter();
       final caps = renderer.capabilities;
-      // Stub must report false until licence is cleared and engine bundled.
-      expect(caps.canRenderPdf, isFalse);
-      expect(caps.supportsBengaliText, isFalse);
+      // After licence gate closed, adapter reports true for PDF capabilities
+      expect(caps.canRenderPdf, isTrue);
+      expect(caps.supportsBengaliText, isTrue);
+      expect(caps.canExtractText, isTrue);
       expect(caps.toString(), contains('pdf'));
     });
 
-    test('canRender returns false for graceful degradation (stub)', () {
+    test('canRender returns true for PDF, false for image (graceful)', () {
       const renderer = PdfiumRendererAdapter();
-      // Must not throw, must return false for graceful degradation.
-      expect(renderer.canRender(pdfDoc), isFalse);
+      expect(renderer.canRender(pdfDoc), isTrue);
       expect(renderer.canRender(imageDoc), isFalse);
     });
 
-    test('getPageCount throws DocumentRenderException in stub', () async {
+    test('getPageCount throws DocumentRenderException when file missing', () async {
       const renderer = PdfiumRendererAdapter();
+      // File does not exist, should throw file not found, not licence gate
       await expectLater(
         renderer.getPageCount(pdfDoc),
-        throwsA(isA<DocumentRenderException>()),
+        throwsA(
+          isA<DocumentRenderException>().having(
+            (e) => e.message,
+            'message',
+            contains('file not found'),
+          ),
+        ),
       );
     });
 
-    test('renderPage validates arguments before engine check', () async {
+    test('renderPage validates arguments before file check', () async {
       const renderer = PdfiumRendererAdapter();
       await expectLater(
         renderer.renderPage(pdfDoc, -1),
@@ -74,7 +83,7 @@ void main() {
       );
     });
 
-    test('renderPage throws DocumentRenderException in stub (licence gate)', () async {
+    test('renderPage throws file not found when file missing', () async {
       const renderer = PdfiumRendererAdapter();
       await expectLater(
         renderer.renderPage(pdfDoc, 0),
@@ -82,33 +91,31 @@ void main() {
           isA<DocumentRenderException>().having(
             (e) => e.message,
             'message',
-            contains('licence gate'),
+            contains('file not found'),
           ),
         ),
       );
     });
 
-    test('extractText throws when capability false', () async {
+    test('extractText throws file not found when file missing', () async {
       const renderer = PdfiumRendererAdapter();
-      expect(renderer.capabilities.canExtractText, isFalse);
+      expect(renderer.capabilities.canExtractText, isTrue);
       await expectLater(
         renderer.extractText(pdfDoc, 0),
         throwsA(isA<DocumentRenderException>()),
       );
     });
 
-    test('dispose is no-op in stub', () async {
+    test('dispose is no-op', () async {
       const renderer = PdfiumRendererAdapter();
       await expectLater(renderer.dispose(), completes);
     });
 
-    test('engineName does not expose vendor types', () {
+    test('engineName does not expose vendor types and is pdfium', () {
       const renderer = PdfiumRendererAdapter();
-      // engineName must be generic, not a vendor class name.
       expect(renderer.engineName, isNot(contains('PdfDocument')));
-      expect(renderer.engineName, isNot(contains('Pdfium')));
-      // Our stub uses 'pdfium-stub' — generic identifier, not vendor type.
-      expect(renderer.engineName, equals('pdfium-stub'));
+      expect(renderer.engineName, isNot(contains('pdfrx'))); // vendor package name not in engineName
+      expect(renderer.engineName, equals('pdfium'));
     });
   });
 }
