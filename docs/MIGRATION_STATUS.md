@@ -132,29 +132,55 @@ Recorded so a future session does not "rediscover" them and reverse the decision
 ### Verification commands
 
 ```bash
-dart test                                    # 68/68 locally (Dart SDK only)
-flutter test --reporter expanded             # CI - NOT yet executed
-flutter analyze --fatal-infos                # CI - NOT yet executed
+dart test                                    # local approximation (Dart SDK only)
+flutter analyze --fatal-infos                # authoritative via CI
+flutter test --reporter expanded             # authoritative via CI — 95/95
+flutter build apk --debug                    # authoritative via CI — now passing
 dart analyze --fatal-infos lib/core test/core  # local approximation: no issues
 ```
 
 ### CI result — verified on GitHub Actions
 
-Both workflows were executed on push and passed for `c81ac43`:
+**Latest verified HEAD:** `f1bad87` (fix: bump Kotlin to 2.2.20)
 
-| Workflow | Job | Result |
-|---|---|---|
-| CI | Analyze — `flutter analyze --fatal-infos` | **success** |
-| CI | Test — `flutter test --reporter expanded` | **success — `00:00 +68: All tests passed!`** |
-| Security Scan | Gitleaks secret scan | **success** |
+| Workflow | Job | Result | Evidence |
+|---|---|---|---|
+| CI | Analyze — `flutter analyze --fatal-infos` | **success** | Run `33261383356` — `No issues found!` |
+| CI | Test — `flutter test --reporter expanded` | **success — 95/95** | Run `33261383356` — `00:01 +95: All tests passed!` |
+| CI | Android debug build — `flutter build apk --debug` | **success** | Run `33261383356` — Build Android debug APK success, artifact `docdr-debug-apk` uploaded |
+| Security Scan | Gitleaks secret scan | **success** | Run `33261383445` |
 
-Run URLs:
-- CI: https://github.com/soobujmiah/docdr/actions/runs/33258158299
-- Security Scan: https://github.com/soobujmiah/docdr/actions/runs/33258158311
+**Historical CI progression — evidence of repair:**
+
+| HEAD | CI Run | Analyze | Test | Android | Root cause / fix |
+|---|---|---|---|---|---|
+| `b40a30e` | `33259373333` | success | success | **failure** | `org.jetbrains.kotlin.android` version `1.10.10` not found (invalid version) |
+| `ae5fd34` | `33260606382` | success | success | **failure** | Gradle 8.5.0 < Flutter minimum 8.14.0 |
+| `76b61e4` | `33260775651` | success | success | **failure** | Gradle 8.14.0 artifact 404 (8.14.0 does not exist, actual is 8.14) |
+| `ca5615b` | `33260974022` | success | success | **failure** | AGP 8.7.3 < Flutter minimum 8.11.1 |
+| `8a52a8f` | `33261164762` | success | success | **failure** | Kotlin 2.1.0 < Flutter minimum 2.2.20 |
+| `f1bad87` | `33261383356` | **success** | **success 95/95** | **success** | **P0 foundation fully green** — Gradle 8.14-all.zip (200 verified), AGP 8.13.0, Kotlin 2.2.20 |
+
+Run URLs for latest green:
+- CI: https://github.com/soobujmiah/docdr/actions/runs/33261383356
+- Security Scan: https://github.com/soobujmiah/docdr/actions/runs/33261383445
 
 The `flutter analyze` job covers the whole repository including `lib/main.dart`,
-which could not be analysed locally.
+which could not be analysed locally due to VM resource discipline.
 
-**STILL NOT VERIFIED:** every Android build. The platform folder remains text
-scaffolding with `gradle-wrapper.jar` absent; see `android/README.md`. The
-Android build is the only part of the foundation with no passing evidence.
+**Previously unverified — now VERIFIED:** Android debug build.
+
+**Toolchain verified at f1bad87:**
+- Flutter: `stable-3.47.2-x64` (from `subosito/flutter-action@v2` cache key)
+- Java: Temurin 17.0.20+1
+- Gradle: `8.14-all.zip` (distributionUrl `https://services.gradle.org/distributions/gradle-8.14-all.zip` — verified 200 via curl, redirects to GitHub release-assets)
+- AGP: `8.13.0` (above Flutter minimum 8.11.1)
+- Kotlin: `2.2.20` (above Flutter minimum 2.2.20, exact match)
+- `android/.gitignore` correctly ignores `gradle-wrapper.jar`, `gradlew`, `/.gradle`, `/local.properties` — canonical Flutter behavior
+
+**Warnings (non-blocking) at f1bad87:**
+- `Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.`
+- `Warning: Flutter support for your project's AGP version (8.13.0) will soon be dropped. Please upgrade your AGP version to at least 9.0.1 soon.`
+- These indicate Flutter 3.47.2 will eventually require Gradle 9.x and AGP 9.x, but current build is green. Defer upgrade until Flutter stable channel actually requires it, to avoid chasing pre-release requirements.
+
+**Phase 0 exit gate:** clean buildable DocDr repository with no office/private content and documented provenance — **VERIFIED** at `f1bad87` (analyze, test, android debug build, gitleaks all green).
