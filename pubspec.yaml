@@ -21,9 +21,11 @@ dependencies:
   flutter:
     sdk: flutter
   # Pinned exact versions per licence gate to avoid unverified transitive (material_ui in pdfrx 2.5.0)
+  # pdf 3.11.3 requires image <4.6.0, incompatible with image 4.9.2 needed by pdfrx_engine 0.4.6,
+  # so use pdf 3.13.0 which supports image ^4.8.0+ (same Apache-2.0 licence, verified)
   pdfrx: 2.4.7
   pdfrx_engine: 0.4.6
-  pdf: 3.11.3
+  pdf: 3.13.0
   image: 4.9.2
 
 dev_dependencies:
