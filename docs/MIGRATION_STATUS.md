@@ -109,7 +109,7 @@ Unknowns are recorded, never omitted or assumed.
 | **Test result** | **VERIFIED — 95/95 pass** (68 previous + 27 new). `dart analyze --fatal-infos`: **no issues** on `lib/core` and `test`. |
 | **Security implications** | Closes the **storage half of DOC-05**: `resolveAssetPath()` re-validates through `DocumentPathPolicy` and then enforces absolute containment, walking each component so a symbolic link cannot escape the template directory. `basePath` is required to sit inside the store root. Partially pre-empts **RGEN-04** via complexity limits on save. **RGEN-01** (unbounded archive import) and **RGEN-03** (unbounded batch generation) remain open until the ZIP/batch slices land, and the bounds for them are specified in `TemplateStoreLimits`. |
 | **License/provenance** | Original DocDr code plus a ported behavioural contract. No assets, fonts, models or RGEN code copied verbatim. No new dependency introduced — `archive`, `cryptography`, `image`, `printing` and `path_provider` all remain at **UNKNOWN** in `THIRD_PARTY_NOTICES.md`. |
-PLACEHOLDER
+| **Commit** | `621b330` (implementation) · `b6accd8` (this evidence record) |
 
 ### NOT migrated — explicit exclusions
 
