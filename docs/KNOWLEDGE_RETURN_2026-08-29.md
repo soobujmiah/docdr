@@ -70,6 +70,10 @@ engineering foundation.
 | Undo/redo bounded in both directions across 50 mixed cycles | Passing | VERIFIED |
 | Deterministic date output under an injected clock | Passing | VERIFIED |
 | No credentials or secrets committed | Gitleaks pattern scan of the working tree | VERIFIED |
+| `flutter analyze --fatal-infos` passes | GitHub Actions run `33258158299`, Analyze job | VERIFIED |
+| `flutter test` passes — **68/68** | GitHub Actions run `33258158299`, Test job: `00:00 +68: All tests passed!` | VERIFIED |
+| Gitleaks secret scan passes on full history | GitHub Actions run `33258158311` | VERIFIED |
+| `lib/main.dart` passes analysis | Covered by the CI Analyze job (whole repository) | VERIFIED |
 | Clean-room rule holds | No office, institutional, signature, seal or personal content | VERIFIED |
 
 **Correction to a prior finding.** DOC-09 originally described the redo stack
@@ -84,24 +88,18 @@ retained and the invariant is now asserted directly; the severity is reduced.
 
 ## 3. What remains unverified
 
-- **`flutter analyze`** — not executed. No Flutter SDK in the environment.
-  Local analysis used `package:lints/recommended` as an approximation of
-  `flutter_lints` (which is that set plus widget-specific rules). CI must
-  confirm.
-- **`flutter test`** — not executed. Tests use `package:test`, which is
-  compatible with `flutter test`, but this is unproven until CI runs.
 - **Every Android build.** The platform folder is text scaffolding with the
   `gradle-wrapper.jar` binary absent. Status: **UNVERIFIED**. See
-  `android/README.md`.
-- **Both GitHub Actions workflows.** Created, never executed. Status:
-  **NOT VERIFIED**. No claim is made that CI passes.
+  `android/README.md`. This is the only part of the P0 foundation with no
+  passing evidence.
 - **Release signing.** Not configured, deliberately. RGEN-06 recorded
   debug-signed release builds; a real keystore is required before any public
   release.
-- **`lib/main.dart`** was not statically analysed (it imports
-  `package:flutter`, unavailable locally). It is a minimal shell.
 
----
+Resolved since the first draft of this record: `flutter analyze`, `flutter
+test`, the Gitleaks workflow and analysis of `lib/main.dart` are all now
+**verified** on GitHub Actions (runs `33258158299` and `33258158311`) and have
+been moved into section 2.
 
 ## 4. What was intentionally excluded
 

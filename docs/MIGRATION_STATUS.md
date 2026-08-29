@@ -120,6 +120,23 @@ flutter analyze --fatal-infos                # CI - NOT yet executed
 dart analyze --fatal-infos lib/core test/core  # local approximation: no issues
 ```
 
-**NOT VERIFIED:** `flutter analyze`, `flutter test`, any Android build, and the
-Gitleaks workflow. No Flutter SDK or Android toolchain exists in the
-environment where this foundation work was performed; CI must confirm these.
+### CI result — verified on GitHub Actions
+
+Both workflows were executed on push and passed for `c81ac43`:
+
+| Workflow | Job | Result |
+|---|---|---|
+| CI | Analyze — `flutter analyze --fatal-infos` | **success** |
+| CI | Test — `flutter test --reporter expanded` | **success — `00:00 +68: All tests passed!`** |
+| Security Scan | Gitleaks secret scan | **success** |
+
+Run URLs:
+- CI: https://github.com/soobujmiah/docdr/actions/runs/33258158299
+- Security Scan: https://github.com/soobujmiah/docdr/actions/runs/33258158311
+
+The `flutter analyze` job covers the whole repository including `lib/main.dart`,
+which could not be analysed locally.
+
+**STILL NOT VERIFIED:** every Android build. The platform folder remains text
+scaffolding with `gradle-wrapper.jar` absent; see `android/README.md`. The
+Android build is the only part of the foundation with no passing evidence.
