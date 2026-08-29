@@ -6,7 +6,6 @@ import 'package:image/image.dart' as img;
 import '../documents/document.dart';
 import '../documents/document_renderer.dart';
 import '../models/custom_template.dart';
-import '../security/document_path.dart';
 import '../storage/template_store.dart';
 
 /// Thrown when background import fails validation.

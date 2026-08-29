@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:docdr/core/documents/document.dart';
 import 'package:docdr/core/documents/document_renderer.dart';
