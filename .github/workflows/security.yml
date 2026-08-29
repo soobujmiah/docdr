@@ -1,0 +1,36 @@
+name: Security Scan
+
+# Gitleaks scans every commit on push/PR for leaked credentials (GitHub tokens,
+# AWS keys, private keys, .env files, ...) and sweeps the full history weekly so
+# a secret committed and later deleted is still caught.
+#
+# IMPORTANT: DocDr is a PUBLIC repository. Anything committed here is public
+# immediately. If this job ever fails: ROTATE the exposed credential first -
+# deleting the commit is NOT enough - then purge it from history.
+#
+# Config carried over from the RGEN repository, where this job already runs.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "30 3 * * 1"   # every Monday 03:30 UTC
+  workflow_dispatch:
+
+jobs:
+  gitleaks:
+    name: Gitleaks secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"

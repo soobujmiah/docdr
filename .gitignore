@@ -1,0 +1,58 @@
+# DocDr - keep build output, tool caches and local secrets out of a PUBLIC repo.
+# See docs/SECURITY_PRIVACY.md: "Never include real user/office documents in
+# source control."
+
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+*.log
+
+# Flutter plugin tooling
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/captures/
+android/GeneratedPluginRegistrant.java
+*.jks
+*.keystore
+key.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local secrets / environment - never commit
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# User documents, scans, exports, OCR output - never commit real user content
+# (this repository is public).
+documents/
+templates/
+exports/
+scans/
+*.pdf
+*.png
+*.jpg
+*.jpeg
+!assets/**/*.png

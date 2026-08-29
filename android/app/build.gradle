@@ -1,0 +1,48 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.soobujmiah.docdr"
+    compileSdk = 35
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    defaultConfig {
+        applicationId = "com.soobujmiah.docdr"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "0.1.0"
+    }
+
+    // NOTE: release signing is intentionally NOT configured yet.
+    // RGEN finding RGEN-06 recorded release APKs signed with the debug
+    // signing configuration, which cannot establish a controlled publisher
+    // identity and is unsuitable for Play distribution. Configure a real
+    // keystore here before the first release; see docs/ENGINEERING_RULES.md
+    // "Commercial release gate".
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+            // minifyEnabled is left off until a verified ProGuard/R8 ruleset
+            // exists for the PDF/OCR dependencies that are not yet present.
+            minifyEnabled = false
+            shrinkResources = false
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}

@@ -1,0 +1,54 @@
+DocDr - licensing status
+
+Copyright (c) 2026 Sobuj Miah. All rights reserved.
+
+NO LICENCE IS GRANTED.
+
+No permission is given to use, copy, modify, merge, publish, distribute,
+sublicense and/or sell copies of this software, and no rights under any
+patent, trademark or copyright are licensed, until the project owner makes an
+explicit written licensing decision and replaces this file.
+
+WHY THIS FILE EXISTS
+--------------------
+DocDr is a PUBLIC repository with a commercial product intent (see ROADMAP.md
+and docs/MARKET_RESEARCH.md). Under the Berne Convention and GitHub's Terms of
+Service, publishing a repository without a licence means all rights are
+reserved by default: visitors may read and fork it, but may not lawfully
+reuse, redistribute or commercialise the code.
+
+Stating that explicitly is more honest than leaving the repository with no
+LICENCE file at all, and it avoids the common failure mode where a
+contributor or downstream user reasonably infers an open-source grant that was
+never made.
+
+DECISION REQUIRED (blocking for commercial release)
+---------------------------------------------------
+The owner must choose one of the following before public release, and replace
+this file:
+
+  1. Proprietary / all rights reserved
+     - Keeps all commercial options open.
+     - Contributors need a CLA; no community reuse.
+     - Recommended if DocDr is intended as a paid product.
+
+  2. Open source, weak copyleft (Apache-2.0 or MIT)
+     - Maximum adoption and community trust, which suits a local-first
+       privacy product.
+     - Others may fork and ship competing products, including closed ones.
+
+  3. Open source, strong copyleft (GPL-3.0)
+     - Prevents closed-source forks.
+     - Generally incompatible with the standard mobile app stores' terms for
+       most commercial distribution; seek legal advice before choosing.
+
+  4. Source-available (for example BSL 1.1 or a custom licence)
+     - Public code, restricted commercial use, converting to open source
+       later.
+     - Requires licence drafting and legal review.
+
+STATUS: DECISION PENDING - OWNER ACTION REQUIRED.
+
+This is not a placeholder licence. No rights have been granted, and no
+third-party code has been bundled. See THIRD_PARTY_NOTICES.md for the status of
+dependencies that may be introduced later.

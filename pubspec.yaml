@@ -1,0 +1,32 @@
+name: docdr
+description: "Your documents, taken care of. A local-first mobile document workspace."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+# Dependency discipline (docs/ENGINEERING_RULES.md):
+# Every dependency must have a documented purpose, and its redistribution
+# terms must be verified BEFORE it is introduced.
+#
+# Deliberately absent at this stage:
+#   - PDF rendering engines (Syncfusion Flutter PDF, pdf, printing)
+#   - OCR engines / Tesseract traineddata (eng, ben)
+#   - Bundled fonts (Lucida, Noto, calligraphy faces)
+#
+# Reason: RGEN finding RGEN-07 recorded unresolved redistribution/licensing
+# status for exactly these categories. They are NOT introduced here until
+# THIRD_PARTY_NOTICES.md records a verified status for each. See that file.
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: ^1.25.0
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

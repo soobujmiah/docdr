@@ -1,0 +1,54 @@
+name: CI
+
+# Evidence gate for DocDr. Mirrors the toolchain already proven in the RGEN
+# repository (subosito/flutter-action@v2, channel stable).
+#
+# CI philosophy (docs/ENGINEERING_RULES.md): the repository, current tests and
+# documented contracts are authoritative. Nothing is "done" because code
+# exists; it is done when these jobs pass.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        run: flutter analyze --fatal-infos
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test --reporter expanded
