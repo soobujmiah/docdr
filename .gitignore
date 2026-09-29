@@ -62,3 +62,6 @@ Thumbs.db
 !lib/core/documents/**
 !test/core/documents/
 !test/core/documents/**
+
+__pycache__/
+*.py[cod]
