@@ -2,15 +2,15 @@
 # docdr -- deterministic status
 
 - Repository: `soobujmiah/docdr`
-- Generated at: 2026-09-26T21:56:45Z (by `tools/repo_knowledge collect`)
-- Version: `abc9cab`
-- Head: `abc9cab528c7a057e725bd510eedee3ca8da0e2a` on `main` (2026-09-26T21:51:06Z)
+- Generated at: 2026-09-29T17:25:07Z (by `tools/repo_knowledge collect`)
+- Version: `2945d2b`
+- Head: `2945d2b568204b45a94eaa39b7dbf6c29a410a51` on `main` (2026-09-29T17:17:51Z)
 
 ## Build / test
 
-- Build: **passed** (run `36274331167`)
+- Build: **passed** (run `36603937236`)
 - Test: **passed** -- flutter test (ci.yml)
-- Last successful build: `abc9cab528c7a057e725bd510eedee3ca8da0e2a` at 2026-09-26T21:56:45Z
+- Last successful build: `2945d2b568204b45a94eaa39b7dbf6c29a410a51` at 2026-09-29T17:25:07Z
 
 ## Phases
 - Not configured (no `.repo/phases.yaml`).
@@ -19,4 +19,4 @@
 
 - Status: ok
 - Source: ci
-- Last synced at: 2026-09-26T21:56:45Z
+- Last synced at: 2026-09-29T17:25:07Z
