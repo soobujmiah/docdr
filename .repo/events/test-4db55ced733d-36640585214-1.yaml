@@ -1,0 +1,16 @@
+event_id: test-4db55ced733d-36640585214-1
+repository: soobujmiah/docdr
+commit: 4db55ced733def7f3e6225b9f39011db23382c41
+kind: test
+occurred_at: '2026-09-29T22:50:40Z'
+run_id: '36640585214'
+run_attempt: '1'
+status: passed
+summary: flutter test (ci.yml)
+workflow_name: CI
+workflow_id: '345366656'
+event_type: push
+started_at: '2026-09-29T22:36:39Z'
+completed_at: '2026-09-29T22:50:01Z'
+actor: soobujmiah
+run_url: https://github.com/soobujmiah/docdr/actions/runs/36640585214

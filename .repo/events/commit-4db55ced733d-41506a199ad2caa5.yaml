@@ -1,0 +1,8 @@
+event_id: commit-4db55ced733d-41506a199ad2caa5
+repository: soobujmiah/docdr
+commit: 4db55ced733def7f3e6225b9f39011db23382c41
+kind: commit
+occurred_at: '2026-09-29T22:36:35Z'
+status: completed
+summary: Declare the repository's canonical type and add the documentation scaffold
+  (migration waves 2/3)

@@ -1,13 +1,13 @@
 schema_version: 1
 project_id: docdr
 repository: soobujmiah/docdr
-generated_at: '2026-09-29T17:25:07Z'
+generated_at: '2026-09-29T22:50:40Z'
 generated_by: tools/repo_knowledge collect
-version: 2945d2b
+version: 4db55ce
 head:
-  commit: 2945d2b568204b45a94eaa39b7dbf6c29a410a51
+  commit: 4db55ced733def7f3e6225b9f39011db23382c41
   branch: main
-  committed_at: '2026-09-29T17:17:51Z'
+  committed_at: '2026-09-29T22:36:35Z'
 phases:
   source: not_configured
   completed: []
@@ -15,39 +15,39 @@ phases:
   next: null
 build:
   status: passed
-  run_id: '36603937236'
-  commit: 2945d2b568204b45a94eaa39b7dbf6c29a410a51
+  run_id: '36640585214'
+  commit: 4db55ced733def7f3e6225b9f39011db23382c41
   run_attempt: '1'
-  at: '2026-09-29T17:25:07Z'
+  at: '2026-09-29T22:50:40Z'
   timestamp_source: observed
   workflow_name: CI
   workflow_id: '345366656'
   event_type: push
-  started_at: '2026-09-29T17:17:56Z'
-  completed_at: '2026-09-29T17:24:43Z'
+  started_at: '2026-09-29T22:36:39Z'
+  completed_at: '2026-09-29T22:50:01Z'
   actor: soobujmiah
-  run_url: https://github.com/soobujmiah/docdr/actions/runs/36603937236
+  run_url: https://github.com/soobujmiah/docdr/actions/runs/36640585214
 test:
   status: passed
-  run_id: '36603937236'
-  commit: 2945d2b568204b45a94eaa39b7dbf6c29a410a51
+  run_id: '36640585214'
+  commit: 4db55ced733def7f3e6225b9f39011db23382c41
   run_attempt: '1'
-  at: '2026-09-29T17:25:07Z'
+  at: '2026-09-29T22:50:40Z'
   timestamp_source: observed
   workflow_name: CI
   workflow_id: '345366656'
   event_type: push
-  started_at: '2026-09-29T17:17:56Z'
-  completed_at: '2026-09-29T17:24:43Z'
+  started_at: '2026-09-29T22:36:39Z'
+  completed_at: '2026-09-29T22:50:01Z'
   actor: soobujmiah
-  run_url: https://github.com/soobujmiah/docdr/actions/runs/36603937236
+  run_url: https://github.com/soobujmiah/docdr/actions/runs/36640585214
   summary: flutter test (ci.yml)
 last_successful_build:
-  commit: 2945d2b568204b45a94eaa39b7dbf6c29a410a51
-  at: '2026-09-29T17:25:07Z'
-  run_id: '36603937236'
+  commit: 4db55ced733def7f3e6225b9f39011db23382c41
+  at: '2026-09-29T22:50:40Z'
+  run_id: '36640585214'
 last_failed_build: null
 sync:
   status: ok
-  last_synced_at: '2026-09-29T17:25:07Z'
+  last_synced_at: '2026-09-29T22:50:40Z'
   source: ci
